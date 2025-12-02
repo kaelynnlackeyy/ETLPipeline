@@ -41,7 +41,7 @@ class etl_pipeline:
     def run_for_all_states(self, limit: int = None):
         try:
             logger.info("starting pipeline for all states")
-            states_info = self.extractor.fetch_states_info()
+            states_info = self.extractor.get_state_info()
             
             if limit:
                 states_info = states_info[:limit]

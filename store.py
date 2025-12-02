@@ -3,14 +3,14 @@ from typing import List, Optional, Dict
 from contextlib import contextmanager
 from datetime import date
 from schema import covid_schema
-from configuration import config
+from configuration import Config
 
 import logging
 
 logger = logging.getLogger(__name__)
 
 class sqlstorage:    
-    def __init__(self, config: config):
+    def __init__(self, config: Config):
         self.db= config.db
         self._init_db()
     
@@ -53,10 +53,11 @@ class sqlstorage:
             """)
             
             conn.commit()
-            logger.info("Database initialized")
-    
+            logger.info("database initialized")
+
+    @contextmanager
     def _get_connection(self):
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db)
         conn.row_factory = sqlite3.Row
         try:
             yield conn
