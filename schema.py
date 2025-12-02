@@ -1,6 +1,6 @@
-from datetime import datetime, date
+from datetime import date
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator # pyright: ignore[reportMissingImports]
 
 class covid_schema(BaseModel):
    state_code: str = Field(..., min_length=2, max_length=2)
@@ -16,6 +16,6 @@ class covid_schema(BaseModel):
    in_icu_currently: Optional[int] = Field(default=None, ge=0)
    tests_total: Optional[int] = Field(default=None, ge=0)
    @field_validator('state_code', mode='before')
-   
+
    def uppercase_state(cls, v):
         return v.upper() if v else v

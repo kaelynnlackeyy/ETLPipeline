@@ -1,12 +1,12 @@
 # extracts data using a public covid api @ covidtracking
 import requests
 import logging
-from configuration import config
+from configuration import Config
 logger = logging.getLogger(__name__)
 
 
 class data_extraction:
-    def __init__(self, config: config):
+    def __init__(self, config: Config):
         self.config=config
         self.session=requests.Session()
 
