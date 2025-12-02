@@ -16,7 +16,7 @@ def cli():
 def fetch(state, all_states, limit):
     pipeline=etl_pipeline()
     if all_states:
-        total = pipeline.run_for_all_states(limit=limit)
+        total = pipeline.run_for_all_states(limit=100)
         click.echo(f"loaded {total} records across all states")
     elif state:
         records = pipeline.run_for_state(state.upper())
