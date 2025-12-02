@@ -1,5 +1,6 @@
-# Challenge #3 Data Engineering
 # COVID-19 CSV ETL Pipeline
+## Challenge #3: Data Engineering - Open Source Data Pipeline
+### Kaelynn Lackey
 
 This project runs a simple ETL pipeline that loads state-level COVID-19 history from the provided `all-states-history.csv` file (sourced from the public Covid Tracking Project dataset), stores it in a local SQLite database, and exposes a small CLI for exploring the data.
 
