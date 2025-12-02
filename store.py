@@ -147,6 +147,7 @@ class sqlstorage:
     
     def get_summary_stats(self) -> dict:
         with self._get_connection() as conn:
+            
             cursor = conn.execute("""
                 SELECT
                     COUNT(DISTINCT cs.state) as total_states,
@@ -163,5 +164,6 @@ class sqlstorage:
                     ) latest ON cs.state = latest.state
                        AND cs.date = latest.max_date
             """)
+        
             return dict(cursor.fetchone())
 
