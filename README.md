@@ -1,4 +1,4 @@
-# ETLPipeline
+# Challenge #3 Data Engineering
 # COVID-19 CSV ETL Pipeline
 
 This project runs a simple ETL pipeline that loads state-level COVID-19 history from the provided `all-states-history.csv` file (sourced from the public Covid Tracking Project dataset), stores it in a local SQLite database, and exposes a small CLI for exploring the data.
@@ -38,7 +38,7 @@ This project runs a simple ETL pipeline that loads state-level COVID-19 history 
      ```
 
 ## Schema and transformations
-- **Schema**: the table `covid_states` stores `state_code`, `state`, `date`, totals for cases and deaths, confirmed/probable breakdowns, hospitalization counts, ICU counts, and total tests.
+- **Schema**: the table `covid_states` stores `state`, `date`, totals for cases and deaths, confirmed/probable breakdowns, hospitalization counts, ICU counts, and total tests.
 - **Transformations**: the transformer parses dates (`YYYY-MM-DD`) and coerces numeric fields to integers. Missing/blank/invalid numeric values become `NULL` and negative numbers are rejected. Invalid rows are skipped with a warning.
 - **Storage**: records are persisted to SQLite (default `covid_data.db`) with indexes for fast queries.
 
