@@ -18,14 +18,17 @@ class etl_pipeline:
         self.transformer = data_cleaner()
         self.storage = sqlstorage(self.config)
     
-    def run_for_state(self, state_code: str, state_name: str = None):
+    def run_for_state(self, state_code: str):
         try:
             logger.info(f"starting ETL pipeline for {state_code}")
             logger.info(f"extracting data for {state_code}")
-            raw_data = self.extractor.fetch_state_daily(state_code)
+            raw_data = self.extractor.fetch_state_daily(state_code.lower())
             if not state_name:
-                state_info = self.extractor.fetch_state_current(state_code)
-                state_name = state_info.get('data', {}).get('name', state_code)
+                try:
+                    state_info = self.extractor.fetch_state_info(state_code.lower())
+                    state_name = state_info.get("name") or state_info.get("state") or state_code
+                except Exception:
+                    state_name = state_code
             logger.info("cleaning data")
             cleaned_data = self.transformer.clean_and_validate(
                 raw_data, state_code, state_name
@@ -38,22 +41,22 @@ class etl_pipeline:
             logger.error(f"pipeline failed for {state_code}: {e}")
             raise
     
-    def run_for_all_states(self, limit: int = None):
+    def run_for_all_states(self, state_code, limit: int = None):
         try:
             logger.info("starting pipeline for all states")
-            states_info = self.extractor.get_state_info()
+            states_info = self.extractor.fetch_state_info()
             
             if limit:
                 states_info = states_info[:limit]
             total_records = 0
             for state in states_info:
-                state_code = state.get('state_code')
-                state_name = state.get('name')
+                state_code = state.get('state') or state.get('state_code')
+                state_name = state.get('name') or state.get('state')
                 if not state_code:
                     continue
                 
                 try:
-                    records = self.run_for_state(state_code, state_name)
+                    records = self.run_for_state(state_code)
                     total_records += len(records)
                 except Exception as e:
                     logger.error(f"failed to process {state_code}: {e}")

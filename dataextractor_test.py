@@ -139,9 +139,7 @@ def test_get_state_info():
         mock_response.json.return_value = {'data': sample_states_info}
         mock_response.raise_for_status = Mock()
         mock_get.return_value = mock_response
-        
         result = extractor.get_state_info()
-        
         assert len(result) == 2, f"Expected 2 states, got {len(result)}"
         assert result[0]['state_code'] == 'CA', f"Expected CA, got {result[0]['state_code']}"
         mock_get.assert_called_once()

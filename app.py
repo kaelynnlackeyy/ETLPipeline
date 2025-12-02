@@ -19,7 +19,7 @@ def fetch(state, all_states, limit):
         total = pipeline.run_for_all_states(limit=100)
         click.echo(f"loaded {total} records across all states")
     elif state:
-        records = pipeline.run_for_state(state.upper())
+        records = pipeline.run_for_state(state)
         click.echo(f"loaded {len(records)} records for {state}")
     else:
         click.echo("error: Specify --state CODE or --all-states")
@@ -42,7 +42,7 @@ def top(limit, metric):
 @click.argument('state_code')
 def state(state_code):
     pipeline=etl_pipeline()
-    result = pipeline.query_state(state_code.upper())
+    result = pipeline.query_state(state_code)
     if result:
         click.echo(json.dumps(result,indent=2, default=str))
     else:
@@ -54,7 +54,7 @@ def state(state_code):
 @click.option('--days', default=30, help='Number of days')
 def timeline(state_code, days):
     pipeline=etl_pipeline()
-    results= pipeline.query_time_series(state_code.upper(), days)
+    results= pipeline.query_time_series(state_code, days)
     click.echo(f"\nlast {days} days for {state_code}:")
     click.echo(json.dumps(results, indent=2, default=str))
 

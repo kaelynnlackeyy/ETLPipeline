@@ -15,7 +15,7 @@ class covid_schema(BaseModel):
    hospitalized_cumulative: Optional[int] = Field(default=None, ge=0)
    in_icu_currently: Optional[int] = Field(default=None, ge=0)
    tests_total: Optional[int] = Field(default=None, ge=0)
-   @field_validator('state_code', mode='before')
 
-   def uppercase_state(cls, v):
+   @field_validator("state_code", mode="before")
+   def uppercase_state(cls, v):  
         return v.upper() if v else v
