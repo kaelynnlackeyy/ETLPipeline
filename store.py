@@ -18,8 +18,7 @@ class sqlstorage:
         with self._get_connection() as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS covid_states (
-                    state_code TEXT NOT NULL,
-                    state_name TEXT NOT NULL,
+                    state TEXT NOT NULL,
                     date DATE NOT NULL,
                     cases_total INTEGER,
                     cases_confirmed INTEGER,
@@ -31,13 +30,13 @@ class sqlstorage:
                     in_icu_currently INTEGER,
                     tests_total INTEGER,
                     loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (state_code, date)
+                    PRIMARY KEY (state, date)
                 )
             """)
             
             conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_state_code 
-                ON covid_states(state_code)
+                CREATE INDEX IF NOT EXISTS idx_state 
+                ON covid_states(state)
             """)
             conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_date 
@@ -68,13 +67,13 @@ class sqlstorage:
         with self._get_connection() as conn:
             conn.executemany("""
                 INSERT OR REPLACE INTO covid_states 
-                (state_code, state_name, date, cases_total, cases_confirmed,
+                (state, date, cases_total, cases_confirmed,
                  deaths_total, deaths_confirmed, deaths_probable,
                  hospitalized_currently, hospitalized_cumulative,
                  in_icu_currently, tests_total)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [
-                (r.state_code, r.state_name, r.date, r.cases_total, 
+                (r.state, r.date, r.cases_total, 
                  r.cases_confirmed, r.deaths_total, r.deaths_confirmed,
                  r.deaths_probable, r.hospitalized_currently,
                  r.hospitalized_cumulative, r.in_icu_currently, r.tests_total)
@@ -83,15 +82,15 @@ class sqlstorage:
             conn.commit()
             logger.info(f"Inserted {len(records)} records")
     
-    def get_latest_by_state(self, state_code: str) -> Optional[dict]:
+    def get_latest_by_state(self, state: str) -> Optional[dict]:
         """Get most recent data for a state"""
         with self._get_connection() as conn:
             cursor = conn.execute("""
                 SELECT * FROM covid_states 
-                WHERE state_code = ?
+                WHERE state = ?
                 ORDER BY date DESC
                 LIMIT 1
-            """, (state_code,))
+            """, (state,))
             row = cursor.fetchone()
             return dict(row) if row else None
     
@@ -110,10 +109,10 @@ class sqlstorage:
                 cursor = conn.execute("""
                     SELECT cs.* FROM covid_states cs
                     INNER JOIN (
-                        SELECT state_code, MAX(date) as max_date
+                        SELECT state, MAX(date) as max_date
                         FROM covid_states
-                        GROUP BY state_code
-                    ) latest ON cs.state_code = latest.state_code 
+                        GROUP BY state
+                    ) latest ON cs.state = latest.state 
                            AND cs.date = latest.max_date
                     ORDER BY cs.cases_total DESC
                     LIMIT ?
@@ -125,43 +124,43 @@ class sqlstorage:
             cursor = conn.execute("""
                 SELECT cs.* FROM covid_states cs
                 INNER JOIN (
-                    SELECT state_code, MAX(date) as max_date
+                    SELECT state, MAX(date) as max_date
                     FROM covid_states
-                    GROUP BY state_code
-                ) latest ON cs.state_code = latest.state_code 
+                    GROUP BY state
+                ) latest ON cs.state = latest.state 
                        AND cs.date = latest.max_date
                 ORDER BY cs.deaths_total DESC
                 LIMIT ?
             """, (limit,))
             return [dict(row) for row in cursor.fetchall()]
     
-    def get_time_series(self, state_code: str, 
+    def get_time_series(self, state: str, 
                        days: int = 30) -> List[dict]:
         with self._get_connection() as conn:
             cursor = conn.execute("""
                 SELECT * FROM covid_states
-                WHERE state_code = ?
+                WHERE state = ?
                 ORDER BY date DESC
                 LIMIT ?
-            """, (state_code, days))
+            """, (state, days))
             return [dict(row) for row in cursor.fetchall()]
     
     def get_summary_stats(self) -> dict:
         with self._get_connection() as conn:
             cursor = conn.execute("""
-                SELECT 
-                    COUNT(DISTINCT state_code) as total_states,
-                    SUM(cases_total) as total_cases,
-                    SUM(deaths_total) as total_deaths,
-                    SUM(hospitalized_currently) as total_hospitalized,
-                    AVG(cases_total) as avg_cases_per_state,
-                    MAX(date) as latest_date
+                SELECT
+                    COUNT(DISTINCT cs.state) as total_states,
+                    SUM(cs.cases_total) as total_cases,
+                    SUM(cs.deaths_total) as total_deaths,
+                    SUM(cs.hospitalized_currently) as total_hospitalized,
+                    AVG(cs.cases_total) as avg_cases_per_state,
+                    MAX(cs.date) as latest_date
                 FROM covid_states cs
                 INNER JOIN (
-                    SELECT state_code, MAX(date) as max_date
+                    SELECT state, MAX(date) as max_date
                     FROM covid_states
-                    GROUP BY state_code
-                ) latest ON cs.state_code = latest.state_code 
+                    GROUP BY state
+                    ) latest ON cs.state = latest.state
                        AND cs.date = latest.max_date
             """)
             return dict(cursor.fetchone())

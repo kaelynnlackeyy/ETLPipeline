@@ -39,23 +39,23 @@ def top(limit, metric):
 
 
 @cli.command()
-@click.argument('state_code')
-def state(state_code):
+@click.argument('state')
+def state(state):
     pipeline=etl_pipeline()
-    result = pipeline.query_state(state_code)
+    result = pipeline.query_state(state)
     if result:
         click.echo(json.dumps(result,indent=2, default=str))
     else:
-        click.echo(f"no data found for {state_code}")
+        click.echo(f"no data found for {state}")
 
 
 @cli.command()
-@click.argument('state_code')
+@click.argument('state')
 @click.option('--days', default=30, help='Number of days')
-def timeline(state_code, days):
+def timeline(state, days):
     pipeline=etl_pipeline()
-    results= pipeline.query_time_series(state_code, days)
-    click.echo(f"\nlast {days} days for {state_code}:")
+    results= pipeline.query_time_series(state, days)
+    click.echo(f"\nlast {days} days for {state}:")
     click.echo(json.dumps(results, indent=2, default=str))
 
 @cli.command()
@@ -63,13 +63,12 @@ def summary():
     """Get summary statistics"""
     pipeline=etl_pipeline()
     stats = pipeline.get_summary()
-    click.echo("\n=== covid-19 summary statistics ===")
-    click.echo(f"total states: {stats.get('total_states')}")
-    click.echo(f"total cases: {stats.get('total_cases'):,}")
-    click.echo(f"total deaths: {stats.get('total_deaths'):,}")
-    click.echo(f"currently Hhspitalized: {stats.get('total_hospitalized'):,}")
+    click.echo(f"total states: {stats.get('total_states') or 0}")
+    click.echo(f"total cases: {(stats.get('total_cases') or 0):,}")
+    click.echo(f"total deaths: {(stats.get('total_deaths') or 0):,}")
+    hospitalized = stats.get('total_hospitalized')
+    click.echo(f"currently hospitalized: {(hospitalized or 0):,}")
     click.echo(f"latest data date: {stats.get('latest_date')}")
-
 if __name__ == '__main__':
     cli()
 

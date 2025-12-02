@@ -91,11 +91,11 @@ def get_sample_states_info():
     """Sample states info response"""
     return [
         {
-            'state_code': 'CA',
+            'state': 'CA',
             'name': 'California'
         },
         {
-            'state_code': 'TX',
+            'state': 'TX',
             'name': 'Texas'
         }
     ]
@@ -105,8 +105,8 @@ def get_sample_records():
     """Sample validated records"""
     return [
         covid_schema(
-            state_code='CA',
-            state_name='California',
+            state='CA',
+            state='California',
             date=date(2021, 3, 7),
             cases_total=3500000,
             cases_confirmed=3400000,
@@ -116,8 +116,8 @@ def get_sample_records():
             tests_total=45000000
         ),
         covid_schema(
-            state_code='CA',
-            state_name='California',
+            state='CA',
+            state='California',
             date=date(2021, 3, 6),
             cases_total=3480000,
             cases_confirmed=3380000,
@@ -128,24 +128,15 @@ def get_sample_records():
         )
     ]
 
-def test_get_state_info():
-    """Test successful states info fetch"""
-    sample_states_info = get_sample_states_info()
-    config = config()
-    extractor = data_extraction(config)
-    
-    with patch.object(extractor.session, 'get') as mock_get:
-        mock_response = Mock()
-        mock_response.json.return_value = {'data': sample_states_info}
-        mock_response.raise_for_status = Mock()
-        mock_get.return_value = mock_response
-        result = extractor.get_state_info()
-        assert len(result) == 2, f"Expected 2 states, got {len(result)}"
-        assert result[0]['state_code'] == 'CA', f"Expected CA, got {result[0]['state_code']}"
-        mock_get.assert_called_once()
-    
+def test_loads_csv_and_states_present():
+    extractor = data_extraction(Config())
+    states = extractor.get_state_info()
+    assert len(states) > 0
+    sample_state = states[0]["state"]
+    assert extractor.fetch_state_daily(sample_state), "Expected records for sample state"
     print("test_fetch_states_info_success passed")
 
-
-test_get_state_info()
+if __name__ == "__main__":
+    test_loads_csv_and_states_present()
+    print("data extraction smoke test passed")
      
