@@ -4,7 +4,6 @@ from configuration import Config
 from typing import List, Dict, Any
 import csv
 from collections import defaultdict
-
 import requests
 
 logger = logging.getLogger(__name__)

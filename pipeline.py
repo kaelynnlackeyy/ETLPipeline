@@ -23,8 +23,6 @@ class etl_pipeline:
             logger.info(f"starting ETL pipeline for {state}")
             logger.info(f"extracting data for {state}")
             raw_data = self.extractor.fetch_state_daily(state.upper())
-            if not state:
-               state_name = state
             logger.info("cleaning data")
             cleaned_data = self.transformer.clean_and_validate(
                 raw_data, state
@@ -33,6 +31,8 @@ class etl_pipeline:
                 logger.warning("no valid records found for %s", state)
                 return []
             logger.info("cleaning data")
+            logger.info("loading cleaned data into storage")
+            self.storage.insert_records(cleaned_data)
             logger.info(f"completed for {state}")
             return cleaned_data            
         except Exception as e:

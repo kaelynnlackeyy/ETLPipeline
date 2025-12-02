@@ -68,12 +68,12 @@ class sqlstorage:
             conn.executemany("""
                 INSERT OR REPLACE INTO covid_states 
                 (state, date, cases_total, cases_confirmed,
-                 deaths_total, deaths_confirmed, deaths_probable,
-                 hospitalized_currently, hospitalized_cumulative,
-                 in_icu_currently, tests_total)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                deaths_total, deaths_confirmed, deaths_probable,
+                hospitalized_currently, hospitalized_cumulative,
+                in_icu_currently, tests_total)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [
-                (r.state, r.date, r.cases_total, 
+                (r.state, r.date, r.cases_total,
                  r.cases_confirmed, r.deaths_total, r.deaths_confirmed,
                  r.deaths_probable, r.hospitalized_currently,
                  r.hospitalized_cumulative, r.in_icu_currently, r.tests_total)

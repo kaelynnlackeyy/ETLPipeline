@@ -54,7 +54,7 @@ def state(state):
 @click.option('--days', default=30, help='Number of days')
 def timeline(state, days):
     pipeline=etl_pipeline()
-    results= pipeline.query_time_series(state, days)
+    results= pipeline.query_time_series(state.upper(), days)
     click.echo(f"\nlast {days} days for {state}:")
     click.echo(json.dumps(results, indent=2, default=str))
 
