@@ -54,26 +54,6 @@ This project runs a simple ETL pipeline that loads state-level COVID-19 history 
   python -m unittest discover -s tests
   ```
 
-## Data flow overview
-```mermaid
-flowchart TD
-    A[Local CSV: all-states-history.csv] -->|read via csv.DictReader| B[data_extraction]
-    B -->|state rows| C[data_cleaner]
-    C -->|validated covid_schema records| D[sqlstorage (SQLite covid_data.db)]
-    subgraph CLI
-        E[fetch --state/--all-states]
-        F[top --metric]
-        G[state STATE]
-        H[timeline STATE --days]
-        I[summary]
-    end
-    E --> D
-    F --> D
-    G --> D
-    H --> D
-    I --> D
-```
-
 ## Implementation notes
 - All data comes exclusively from the local CSV—no external API calls are made.
 - Missing or blank values in the CSV are treated as `null` and ignored by validation when appropriate.
