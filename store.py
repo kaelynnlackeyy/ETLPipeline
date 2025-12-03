@@ -134,15 +134,14 @@ class sqlstorage:
             """, (limit,))
             return [dict(row) for row in cursor.fetchall()]
     
-    def get_time_series(self, state: str, 
-                       days: int = 30) -> List[dict]:
+    def get_time_series(self, state: str,days: int = 30) -> List[dict]:
         with self._get_connection() as conn:
             cursor = conn.execute("""
                 SELECT * FROM covid_states
                 WHERE state = ?
                 ORDER BY date DESC
                 LIMIT ?
-            """, (state, days))
+            """, (state.upper(), days))
             return [dict(row) for row in cursor.fetchall()]
     
     def get_summary_stats(self) -> dict:

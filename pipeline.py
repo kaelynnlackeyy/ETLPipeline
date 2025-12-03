@@ -78,7 +78,7 @@ class etl_pipeline:
         return self.storage.get_latest_by_state(state)
     
     def query_time_series(self, state: str, days: int = 30):
-        return self.storage.get_time_series(state, days)
+        return self.storage.get_time_series(state.upper(), days)
     
     def get_summary(self):
         return self.storage.get_summary_stats()

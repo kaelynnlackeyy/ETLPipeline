@@ -28,7 +28,6 @@ class data_extraction:
                     state = row.get("state")
                     if not state:
                         continue
-                    # Normalize keys we care about; keep raw strings for cleaning
                     filtered_row = {
                         "date": row.get("date"),
                         "state": state,
@@ -43,7 +42,6 @@ class data_extraction:
                         "totalTestResults": row.get("totalTestResults"),
                     }
                     self._data_by_state[state].append(filtered_row)
-            # Ensure rows are ordered newest-first for predictable inserts
             for state, records in self._data_by_state.items():
                 self._data_by_state[state] = sorted(
                     records, key=lambda r: r.get("date", ""), reverse=True

@@ -4,6 +4,8 @@ import click
 from pipeline import etl_pipeline
 import json
 
+# cases: fetch, state, summary, timeline, top
+
 @click.group()
 def cli():
     """covid data ETL pipeline"""
@@ -42,7 +44,7 @@ def top(limit, metric):
 @click.argument('state')
 def state(state):
     pipeline=etl_pipeline()
-    result = pipeline.query_state(state)
+    result = pipeline.query_state(state.upper())
     if result:
         click.echo(json.dumps(result,indent=2, default=str))
     else:
@@ -69,6 +71,42 @@ def summary():
     hospitalized = stats.get('total_hospitalized')
     click.echo(f"currently hospitalized: {(hospitalized or 0):,}")
     click.echo(f"latest data date: {stats.get('latest_date')}")
+
+@cli.command()
+@click.argument('state')
+@click.option('--metric', default='cases',
+              type=click.Choice(['cases', 'deaths']))
+@click.option('--days', default=30, help='Number of days to plot')
+@click.option('--output', default='timeline.png',
+              help='Output file for the chart')
+def visualize(state, metric, days, output):
+    """Generate a simple timeline visualization for a state."""
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    pipeline = etl_pipeline()
+    records = pipeline.query_time_series(state.upper(), days)
+    if not records:
+        click.echo(f"no data found for {state}")
+        return
+
+    sorted_records = sorted(records, key=lambda r: r['date'])
+    dates = [r['date'] for r in sorted_records]
+    values = [r['cases_total'] if metric == 'cases' else r['deaths_total']
+              for r in sorted_records]
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(dates, values, marker='o')
+    plt.title(f"{state.upper()} {metric} over last {len(sorted_records)} days")
+    plt.xlabel('Date')
+    plt.ylabel('Total ' + metric)
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.grid(True)
+    plt.savefig(output)
+    click.echo(f"saved visualization to {output}")
+
 if __name__ == '__main__':
     cli()
 
